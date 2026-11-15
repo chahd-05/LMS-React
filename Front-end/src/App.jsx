@@ -10,6 +10,8 @@ import Courses from "./pages/Admin/Courses";
 import Users from "./pages/Admin/Users";
 import LearnerHome from "./pages/Learner/LearnerHome";
 
+import Login from "./pages/Login";
+
 function App() {
   const [currentRole, setCurrentRole] = useState("admin");
   const [currentPage, setCurrentPage] = useState("courses");
@@ -73,6 +75,10 @@ function App() {
     );
   };
 
+  if (currentRole === "login") {
+  return <Login />;
+}
+
   if (currentRole === "learner") {
     return (
       <LearnerLayout onLogout={handleLogout}>
@@ -111,6 +117,13 @@ function App() {
           Preview Learner
         </button>
       </nav>
+
+      <button
+        type="button"
+        onClick={() => setCurrentRole("login")}
+      >
+          Preview Login
+      </button>
 
       {renderAdminPage()}
     </AdminLayout>
