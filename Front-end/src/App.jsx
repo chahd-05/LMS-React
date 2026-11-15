@@ -12,6 +12,8 @@ import LearnerHome from "./pages/Learner/LearnerHome";
 
 import Login from "./pages/Login";
 
+import { apiRequest } from "./services/api";
+
 function App() {
   const [currentRole, setCurrentRole] = useState("admin");
   const [currentPage, setCurrentPage] = useState("courses");
@@ -48,6 +50,15 @@ function App() {
     },
   ]);
 
+  const handleLogin = async ({ email, password }) => {
+    const response = await apiRequest("/auth/login", {
+      method: "POST",
+      body: { email, password },
+    });
+
+    console.log("Login response:", response);
+  };
+
   const handleLogout = () => {
     setCurrentRole("admin");
     setCurrentPage("courses");
@@ -76,8 +87,8 @@ function App() {
   };
 
   if (currentRole === "login") {
-  return <Login />;
-}
+    return <Login />;
+  }
 
   if (currentRole === "learner") {
     return (
@@ -122,7 +133,7 @@ function App() {
         type="button"
         onClick={() => setCurrentRole("login")}
       >
-          Preview Login
+        Preview Login
       </button>
 
       {renderAdminPage()}
