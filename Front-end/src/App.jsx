@@ -1,6 +1,8 @@
 
 import { useState } from "react";
 
+import "./App.css";
+
 import AdminLayout from "./components/layouts/AdminLayout";
 import LearnerLayout from "./components/layouts/LearnerLayout";
 
