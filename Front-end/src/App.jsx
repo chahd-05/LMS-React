@@ -1,122 +1,118 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+
+import { useState } from "react";
+
+import AdminLayout from "./components/layouts/AdminLayout";
+import LearnerLayout from "./components/layouts/LearnerLayout";
+
+import Courses from "./pages/Admin/Courses";
+import Users from "./pages/Admin/Users";
+import LearnerHome from "./pages/Learner/LearnerHome";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentRole, setCurrentRole] = useState("admin");
+  const [currentPage, setCurrentPage] = useState("courses");
+
+  const [courses] = useState([
+    {
+      id: 1,
+      title: "JavaScript Fundamentals",
+      description: "Learn the basics of JavaScript.",
+      status: "Published",
+    },
+    {
+      id: 2,
+      title: "React Fundamentals",
+      description: "Learn components, props and state.",
+      status: "Published",
+    },
+  ]);
+
+  const [users] = useState([
+    {
+      id: 1,
+      name: "Sara Ahmed",
+      email: "sara@example.com",
+      role: "learner",
+      status: "active",
+    },
+    {
+      id: 2,
+      name: "Youssef Ali",
+      email: "youssef@example.com",
+      role: "learner",
+      status: "active",
+    },
+  ]);
+
+  const handleLogout = () => {
+    setCurrentRole("admin");
+    setCurrentPage("courses");
+  };
+
+  const renderAdminPage = () => {
+    if (currentPage === "users") {
+      return (
+        <Users
+          users={users}
+          onCreateUser={() => console.log("Create user")}
+          onSelectUser={(user) => console.log("Selected user:", user)}
+        />
+      );
+    }
+
+    return (
+      <Courses
+        courses={courses}
+        onCreateCourse={() => console.log("Create course")}
+        onSelectCourse={(course) =>
+          console.log("Selected course:", course)
+        }
+      />
+    );
+  };
+
+  if (currentRole === "learner") {
+    return (
+      <LearnerLayout onLogout={handleLogout}>
+        <LearnerHome
+          user={{ name: "Sara" }}
+          courses={courses}
+          onSelectCourse={(course) =>
+            console.log("Selected course:", course)
+          }
+        />
+      </LearnerLayout>
+    );
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <AdminLayout onLogout={handleLogout}>
+      <nav className="page-navigation">
         <button
           type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={() => setCurrentPage("courses")}
         >
-          Count is {count}
+          Courses
         </button>
-      </section>
 
-      <div className="ticks"></div>
+        <button
+          type="button"
+          onClick={() => setCurrentPage("users")}
+        >
+          Users
+        </button>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <button
+          type="button"
+          onClick={() => setCurrentRole("learner")}
+        >
+          Preview Learner
+        </button>
+      </nav>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {renderAdminPage()}
+    </AdminLayout>
+  );
 }
 
-export default App
+export default App;
