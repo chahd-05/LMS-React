@@ -9,7 +9,9 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
+    if (isLoading) return;
+
     setError("");
 
     if (!email.trim() || !password.trim()) {
@@ -23,16 +25,16 @@ function Login({ onLogin }) {
     }
 
     try {
-  setIsLoading(true);
+      setIsLoading(true);
 
-  if (onLogin) {
-    await onLogin({ email, password });
-  }
-} catch (err) {
-  setError(err.message || "Something went wrong.");
-} finally {
-  setIsLoading(false);
-}
+      if (onLogin) {
+        await onLogin({ email, password });
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
