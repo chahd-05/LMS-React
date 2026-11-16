@@ -42,6 +42,7 @@
  *               message: modules route works
  */
 const express = require("express");
+const cors = require("cors")
 
 const courseRoutes = require("./routes/courseRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
@@ -63,6 +64,10 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 
 const app = express();
+
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 
 app.use(express.json());
 
