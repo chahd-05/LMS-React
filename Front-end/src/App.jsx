@@ -15,7 +15,15 @@ import Login from "./pages/Login";
 import { apiRequest } from "./services/api";
 
 function App() {
-  const [currentRole, setCurrentRole] = useState("admin");
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [currentPage, setCurrentPage] = useState("courses");
 
   const [courses] = useState([
@@ -50,24 +58,25 @@ function App() {
     },
   ]);
 
-  
-const handleLogin = async ({ email, password }) => {
-  const response = await apiRequest("/auth/login", {
-    method: "POST",
-    body: { email, password },
-  });
+  const handleLogin = async ({ email, password }) => {
+    const response = await apiRequest("/auth/login", {
+      method: "POST",
+      body: { email, password },
+    });
 
-  const { token, user } = response.data;
+    const { token, user } = response.data;
 
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-  console.log("Logged in user:", user);
-};
-
+    setCurrentUser(user);
+  };
 
   const handleLogout = () => {
-    setCurrentRole("admin");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setCurrentUser(null);
     setCurrentPage("courses");
   };
 
@@ -77,7 +86,9 @@ const handleLogin = async ({ email, password }) => {
         <Users
           users={users}
           onCreateUser={() => console.log("Create user")}
-          onSelectUser={(user) => console.log("Selected user:", user)}
+          onSelectUser={(user) =>
+            console.log("Selected user:", user)
+          }
         />
       );
     }
@@ -93,15 +104,15 @@ const handleLogin = async ({ email, password }) => {
     );
   };
 
-  if (currentRole === "login") {
+  if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
 
-  if (currentRole === "learner") {
+  if (currentUser.role === "learner") {
     return (
       <LearnerLayout onLogout={handleLogout}>
         <LearnerHome
-          user={{ name: "Sara" }}
+          user={{ name: currentUser.email }}
           courses={courses}
           onSelectCourse={(course) =>
             console.log("Selected course:", course)
@@ -111,41 +122,31 @@ const handleLogin = async ({ email, password }) => {
     );
   }
 
-  return (
-    <AdminLayout onLogout={handleLogout}>
-      <nav className="page-navigation">
-        <button
-          type="button"
-          onClick={() => setCurrentPage("courses")}
-        >
-          Courses
-        </button>
+  if (currentUser.role === "admin") {
+    return (
+      <AdminLayout onLogout={handleLogout}>
+        <nav className="page-navigation">
+          <button
+            type="button"
+            onClick={() => setCurrentPage("courses")}
+          >
+            Courses
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setCurrentPage("users")}
-        >
-          Users
-        </button>
+          <button
+            type="button"
+            onClick={() => setCurrentPage("users")}
+          >
+            Users
+          </button>
+        </nav>
 
-        <button
-          type="button"
-          onClick={() => setCurrentRole("learner")}
-        >
-          Preview Learner
-        </button>
-      </nav>
+        {renderAdminPage()}
+      </AdminLayout>
+    );
+  }
 
-      <button
-        type="button"
-        onClick={() => setCurrentRole("login")}
-      >
-        Preview Login
-      </button>
-
-      {renderAdminPage()}
-    </AdminLayout>
-  );
+  return <Login onLogin={handleLogin} />;
 }
 
 export default App;
