@@ -57,6 +57,7 @@ function App() {
     });
 
     console.log("Login response:", response);
+    console.log("User:", response.data.user);
   };
 
   const handleLogout = () => {
@@ -87,7 +88,7 @@ function App() {
   };
 
   if (currentRole === "login") {
-    return <Login />;
+    return <Login onLogin={handleLogin} />;
   }
 
   if (currentRole === "learner") {
