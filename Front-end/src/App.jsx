@@ -50,15 +50,21 @@ function App() {
     },
   ]);
 
-  const handleLogin = async ({ email, password }) => {
-    const response = await apiRequest("/auth/login", {
-      method: "POST",
-      body: { email, password },
-    });
+  
+const handleLogin = async ({ email, password }) => {
+  const response = await apiRequest("/auth/login", {
+    method: "POST",
+    body: { email, password },
+  });
 
-    console.log("Login response:", response);
-    console.log("User:", response.data.user);
-  };
+  const { token, user } = response.data;
+
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(user));
+
+  console.log("Logged in user:", user);
+};
+
 
   const handleLogout = () => {
     setCurrentRole("admin");
