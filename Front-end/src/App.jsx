@@ -112,7 +112,7 @@ function App() {
     return (
       <LearnerLayout onLogout={handleLogout}>
         <LearnerHome
-          user={{ name: currentUser.email }}
+          user={{ name: currentUser.name }}
           courses={courses}
           onSelectCourse={(course) =>
             console.log("Selected course:", course)
