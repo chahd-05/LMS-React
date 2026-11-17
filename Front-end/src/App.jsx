@@ -9,20 +9,15 @@ import LearnerLayout from "./components/layouts/LearnerLayout";
 import Courses from "./pages/Admin/Courses";
 import Users from "./pages/Admin/Users";
 import LearnerHome from "./pages/Learner/LearnerHome";
-
 import Login from "./pages/Login";
 
 import { apiRequest } from "./services/api";
 
+import ProtectedView from "./components/common/protectedView";
+
 function App() {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem("user");
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
 
   const [currentPage, setCurrentPage] = useState("courses");
 
@@ -59,23 +54,23 @@ function App() {
   ]);
 
   const handleLogin = async ({ email, password }) => {
-    const response = await apiRequest("/auth/login", {
-      method: "POST",
-      body: { email, password },
-    });
+    try {
+      const response = await apiRequest("/auth/login", {
+        method: "POST",
+        body: { email, password },
+      });
 
-    const { token, user } = response.data;
+      const { token, user } = response.data;
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    setCurrentUser(user);
+      setToken(token);
+      setCurrentUser(user);
+    } catch (error) {
+      console.error("LOGIN ERROR:", error);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
+    setToken(null);
     setCurrentUser(null);
     setCurrentPage("courses");
   };
@@ -110,43 +105,53 @@ function App() {
 
   if (currentUser.role === "learner") {
     return (
-      <LearnerLayout onLogout={handleLogout}>
-        <LearnerHome
-          user={{ name: currentUser.name }}
-          courses={courses}
-          onSelectCourse={(course) =>
-            console.log("Selected course:", course)
-          }
-        />
-      </LearnerLayout>
+      <ProtectedView
+        session={currentUser}
+        allowedRoles={["learner"]}
+      >
+        <LearnerLayout onLogout={handleLogout}>
+          <LearnerHome
+            user={{ name: currentUser.name }}
+            courses={courses}
+            onSelectCourse={(course) =>
+              console.log("Selected course:", course)
+            }
+          />
+        </LearnerLayout>
+      </ProtectedView>
     );
   }
 
   if (currentUser.role === "admin") {
     return (
-      <AdminLayout onLogout={handleLogout}>
-        <nav className="page-navigation">
-          <button
-            type="button"
-            onClick={() => setCurrentPage("courses")}
-          >
-            Courses
-          </button>
+      <ProtectedView
+        session={currentUser}
+        allowedRoles={["admin"]}
+      >
+        <AdminLayout onLogout={handleLogout}>
+          <nav className="page-navigation">
+            <button
+              type="button"
+              onClick={() => setCurrentPage("courses")}
+            >
+              Courses
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setCurrentPage("users")}
-          >
-            Users
-          </button>
-        </nav>
+            <button
+              type="button"
+              onClick={() => setCurrentPage("users")}
+            >
+              Users
+            </button>
+          </nav>
 
-        {renderAdminPage()}
-      </AdminLayout>
+          {renderAdminPage()}
+        </AdminLayout>
+      </ProtectedView>
     );
   }
 
-  return <Login onLogin={handleLogin} />;
+  return <p role="alert">Rôle non pris en charge.</p>;
 }
 
 export default App;
