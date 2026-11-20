@@ -18,6 +18,7 @@ import ProtectedView from "./components/common/protectedView";
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [accessError, setAccessError] = useState("");
 
   const [currentPage, setCurrentPage] = useState("courses");
 
@@ -54,25 +55,46 @@ function App() {
   ]);
 
   const handleLogin = async ({ email, password }) => {
-    try {
-      const response = await apiRequest("/auth/login", {
-        method: "POST",
-        body: { email, password },
-      });
+    const response = await apiRequest("/auth/login", {
+      method: "POST",
+      body: { email, password },
+    });
 
-      const { token, user } = response.data;
+    const { token, user } = response.data;
 
-      setToken(token);
-      setCurrentUser(user);
-    } catch (error) {
-      console.error("LOGIN ERROR:", error);
-    }
+    setToken(token);
+    setCurrentUser(user);
+    setAccessError("");
   };
 
   const handleLogout = () => {
     setToken(null);
     setCurrentUser(null);
     setCurrentPage("courses");
+    setAccessError("");
+  };
+
+  const handleApiError = (error) => {
+    if (error.status === 401) {
+      handleLogout();
+      return;
+    }
+
+    if (error.status === 403) {
+      setAccessError("Accès refusé. Vous n'avez pas la permission.");
+    }
+  };
+
+  const authenticatedRequest = async (path, options = {}) => {
+    try {
+      return await apiRequest(path, {
+        ...options,
+        token,
+      });
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
   };
 
   const renderAdminPage = () => {
@@ -110,12 +132,18 @@ function App() {
         allowedRoles={["learner"]}
       >
         <LearnerLayout onLogout={handleLogout}>
+          {accessError && (
+            <p className="error-message" role="alert">
+              {accessError}
+            </p>
+          )}
+
           <LearnerHome
             user={{ name: currentUser.name }}
             courses={courses}
-            onSelectCourse={(course) =>
-              console.log("Selected course:", course)
-            }
+            onSelectCourse={(course) => {
+              console.log("Selected course:", course);
+            }}
           />
         </LearnerLayout>
       </ProtectedView>
@@ -129,6 +157,12 @@ function App() {
         allowedRoles={["admin"]}
       >
         <AdminLayout onLogout={handleLogout}>
+          {accessError && (
+            <p className="error-message" role="alert">
+              {accessError}
+            </p>
+          )}
+
           <nav className="page-navigation">
             <button
               type="button"
