@@ -183,6 +183,91 @@ button:focus-visible {
   border-radius: 8px;
 }
 
+.course-form {
+  max-width: 620px;
+  margin-bottom: 24px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.course-form h2 {
+  margin-top: 0;
+}
+
+.course-form textarea,
+.course-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.course-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.course-form-actions,
+.course-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.courses-content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.course-details-panel {
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.course-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.course-details-header h2 {
+  margin: 0;
+}
+
+.course-details-panel dl,
+.course-details-panel dl div {
+  margin: 0;
+}
+
+.course-details-panel dl div + div {
+  margin-top: 14px;
+}
+
+.course-details-panel dt {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.course-details-panel dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .user-filter {
   display: flex;
   flex-direction: column;
@@ -370,6 +455,10 @@ button:focus-visible {
 
   .courses-list,
   .users-list {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-content {
     grid-template-columns: 1fr;
   }
 
