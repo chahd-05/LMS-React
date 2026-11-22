@@ -9,6 +9,7 @@ const { resumeCourse } = require("../controllers/courseResumeController");
 
 const {
   getCourses,
+  getCourseCatalog,
   getCourseById,
   createCourse,
   updateCourse,
@@ -68,6 +69,42 @@ const router = express.Router();
  *         description: Erreur interne du serveur
  */
 router.get("/", getCourses);
+
+/**
+ * @swagger
+ * /api/courses/catalog:
+ *   get:
+ *     summary: Retrieve the complete course catalog (admin only)
+ *     tags:
+ *       - Courses
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [draft, published, archived]
+ *     responses:
+ *       200:
+ *         description: Complete course catalog retrieved successfully
+ *       400:
+ *         description: Invalid status filter
+ *       401:
+ *         description: Missing or invalid authentication token
+ *       403:
+ *         description: The authenticated user is not an admin
+ */
+router.get(
+  "/catalog",
+  authenticate,
+  authorize(roles.ADMIN),
+  getCourseCatalog
+);
 
 /**
  * @swagger
