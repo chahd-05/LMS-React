@@ -213,6 +213,65 @@ button:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.page-header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.user-create-form {
+  max-width: 520px;
+  margin-bottom: 24px;
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.user-create-form h2 {
+  margin-top: 0;
+}
+
+.success-message {
+  padding: 12px 14px;
+  color: #247a55;
+  background: #e7f6ee;
+  border-radius: 8px;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.user-details-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.user-edit-form {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.user-edit-form h3 {
+  margin-top: 0;
+}
+
+.user-edit-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
 .course-card,
 .user-card,
 .empty-state {
