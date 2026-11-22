@@ -95,3 +95,155 @@ describe("GET /api/users", () => {
     });
   });
 });
+
+describe("Admin user management", () => {
+  beforeEach(async () => {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.create([
+      { name: "Test Admin", email: adminEmail, password: hashedPassword, role: "admin" },
+      { name: "Test Learner", email: learnerEmail, password: hashedPassword, role: "learner" },
+      { name: "Test Trainer", email: trainerEmail, password: hashedPassword, role: "trainer" },
+    ]);
+  });
+
+  afterEach(async () => {
+    await User.deleteMany({ email: { $regex: `@${domain.replace(/\./g, "\\.")}$` } });
+  });
+
+  const login = async (email) => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ email, password });
+
+    return response.body.data && response.body.data.token;
+  };
+
+  test("allows an admin to update a user", async () => {
+    const token = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .put(`/api/users/${learner._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Learner",
+        email: learnerEmail,
+        role: "trainer",
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.name).toBe("updated learner");
+    expect(response.body.data.role).toBe("trainer");
+    expect(response.body.data).not.toHaveProperty("password");
+  });
+
+  test("rejects invalid update data", async () => {
+    const token = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .put(`/api/users/${learner._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "A",
+        email: "invalid-email",
+        role: "invalid-role",
+      });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("rejects duplicate email updates", async () => {
+    const token = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .put(`/api/users/${learner._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Updated Learner",
+        email: trainerEmail,
+        role: "learner",
+      });
+
+    expect(response.statusCode).toBe(409);
+  });
+
+  test("rejects unauthorized user updates", async () => {
+    const token = await login(learnerEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .put(`/api/users/${learner._id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        name: "Unauthorized Update",
+        email: learnerEmail,
+        role: "learner",
+      });
+
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("allows an admin to suspend and activate a user", async () => {
+    const token = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const suspendedResponse = await request(app)
+      .patch(`/api/users/${learner._id}/status`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "suspended" });
+
+    expect(suspendedResponse.statusCode).toBe(200);
+    expect(suspendedResponse.body.data.status).toBe("suspended");
+
+    const activatedResponse = await request(app)
+      .patch(`/api/users/${learner._id}/status`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "active" });
+
+    expect(activatedResponse.statusCode).toBe(200);
+    expect(activatedResponse.body.data.status).toBe("active");
+  });
+
+  test("rejects an invalid status change", async () => {
+    const token = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .patch(`/api/users/${learner._id}/status`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "inactive" });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("rejects unauthorized status changes", async () => {
+    const token = await login(learnerEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    const response = await request(app)
+      .patch(`/api/users/${learner._id}/status`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "suspended" });
+
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("prevents a suspended user from logging in", async () => {
+    const adminToken = await login(adminEmail);
+    const learner = await User.findOne({ email: learnerEmail });
+
+    await request(app)
+      .patch(`/api/users/${learner._id}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "suspended" });
+
+    const loginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({ email: learnerEmail, password });
+
+    expect(loginResponse.statusCode).toBe(403);
+  });
+});
