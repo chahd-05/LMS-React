@@ -7,13 +7,9 @@ function Users({
   users = [],
   loading = false,
   error = "",
-  onCreateUser,
+  onRefreshUsers,
   onSelectUser,
 }) {
-  if (loading) {
-    return <Loading message="Loading users..." />;
-  }
-
   return (
     <section className="page">
       <header className="page-header">
@@ -22,19 +18,23 @@ function Users({
           <p>Manage learners and users on the EduLearn platform.</p>
         </div>
 
-        <Button onClick={onCreateUser}>
-          Add User
+        <Button onClick={onRefreshUsers} disabled={loading}>
+          {loading ? "Loading..." : "Refresh Users"}
         </Button>
       </header>
 
       <ErrorMessage message={error} />
 
-      {users.length === 0 ? (
+      {loading && <Loading message="Loading users..." />}
+
+      {!loading && !error && users.length === 0 && (
         <div className="empty-state">
           <h2>No users yet</h2>
           <p>There are currently no users to display.</p>
         </div>
-      ) : (
+      )}
+
+      {users.length > 0 && (
         <div className="users-list">
           {users.map((user) => (
             <article className="user-card" key={user.id}>

@@ -56,6 +56,7 @@ const quizRoutes = require("./routes/quizRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const feedbackRouter = require("./routes/feedbackRouter");
 const quizAttemptRoutes = require("./routes/quizAttemptRoutes")
+const userRoutes = require("./routes/userRoutes");
 
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
@@ -97,7 +98,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/admin/jobs", jobRoutes);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/quizzes", quizAttemptRoutes)
-
+app.use("/api/users", userRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(notFound);

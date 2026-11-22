@@ -37,22 +37,9 @@ function App() {
     },
   ]);
 
-  const [users] = useState([
-    {
-      id: 1,
-      name: "Sara Ahmed",
-      email: "sara@example.com",
-      role: "learner",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Youssef Ali",
-      email: "youssef@example.com",
-      role: "learner",
-      status: "active",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
 
   const handleLogin = async ({ email, password }) => {
     const response = await apiRequest("/auth/login", {
@@ -97,12 +84,33 @@ function App() {
     }
   };
 
+  const handleLoadUsers = async () => {
+    setUsersLoading(true);
+    setUsersError("");
+
+    try {
+      const response = await authenticatedRequest("/users");
+      const usersWithIds = response.data.map((user) => ({
+        ...user,
+        id: user.id || user._id,
+      }));
+
+      setUsers(usersWithIds);
+    } catch (error) {
+      setUsersError(error.message || "Unable to load users.");
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
   const renderAdminPage = () => {
     if (currentPage === "users") {
       return (
         <Users
           users={users}
-          onCreateUser={() => console.log("Create user")}
+          loading={usersLoading}
+          error={usersError}
+          onRefreshUsers={handleLoadUsers}
           onSelectUser={(user) =>
             console.log("Selected user:", user)
           }
@@ -173,7 +181,10 @@ function App() {
 
             <button
               type="button"
-              onClick={() => setCurrentPage("users")}
+              onClick={() => {
+                setCurrentPage("users");
+                handleLoadUsers();
+              }}
             >
               Users
             </button>
