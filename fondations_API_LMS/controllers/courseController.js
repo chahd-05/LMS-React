@@ -56,6 +56,35 @@ const getCourses = async (req, res, next) => {
   }
 };
 
+const getCourseCatalog = async (req, res, next) => {
+  try {
+    const { category, status } = req.query;
+    const filter = {};
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (status) {
+      if (!["draft", "published", "archived"].includes(status)) {
+        const error = new Error("Status must be draft, published or archived");
+        error.statusCode = 400;
+        return next(error);
+      }
+      filter.status = status;
+    }
+
+    const courses = await Course.find(filter).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: courses.length,
+      data: courses,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getCourseById = async (req, res, next) => {
   try {
     const course = await Course.findOne({
@@ -240,6 +269,7 @@ const changeCourseStatus = async (req, res, next) => {
 module.exports = {
   changeCourseStatus,
   getCourses,
+  getCourseCatalog,
   getCourseById,
   createCourse,
   updateCourse,
