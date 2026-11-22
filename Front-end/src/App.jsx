@@ -103,6 +103,32 @@ function App() {
     }
   };
 
+  const handleCreateUser = async (userData) => {
+    try {
+      return await apiRequest("/auth/register", {
+        method: "POST",
+        body: userData,
+      });
+    } catch (error) {
+      handleApiError(error);
+      throw error;
+    }
+  };
+
+  const handleUpdateUser = async (userId, userData) => {
+    return await authenticatedRequest(`/users/${userId}`, {
+      method: "PUT",
+      body: userData,
+    });
+  };
+
+  const handleUpdateUserStatus = async (userId, status) => {
+    return await authenticatedRequest(`/users/${userId}/status`, {
+      method: "PATCH",
+      body: { status },
+    });
+  };
+
   const renderAdminPage = () => {
     if (currentPage === "users") {
       return (
@@ -111,6 +137,9 @@ function App() {
           loading={usersLoading}
           error={usersError}
           onRefreshUsers={handleLoadUsers}
+          onCreateUser={handleCreateUser}
+          onUpdateUser={handleUpdateUser}
+          onUpdateUserStatus={handleUpdateUserStatus}
         />
       );
     }
