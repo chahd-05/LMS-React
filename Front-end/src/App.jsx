@@ -22,24 +22,37 @@ function App() {
 
   const [currentPage, setCurrentPage] = useState("courses");
 
-  const [courses] = useState([
-    {
-      id: 1,
-      title: "JavaScript Fundamentals",
-      description: "Learn the basics of JavaScript.",
-      status: "Published",
-    },
-    {
-      id: 2,
-      title: "React Fundamentals",
-      description: "Learn components, props and state.",
-      status: "Published",
-    },
-  ]);
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [coursesError, setCoursesError] = useState("");
 
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
+
+  const handleLoadCourses = async (authToken = token) => {
+    setCoursesLoading(true);
+    setCoursesError("");
+
+    try {
+      const path =
+        currentUser?.role === "admin" ? "/courses/catalog" : "/courses";
+      const response = await apiRequest(path, {
+        token: currentUser?.role === "admin" ? authToken : undefined,
+      });
+      const coursesWithIds = response.data.map((course) => ({
+        ...course,
+        id: course.id || course._id,
+      }));
+
+      setCourses(coursesWithIds);
+    } catch (error) {
+      handleApiError(error);
+      setCoursesError(error.message || "Unable to load courses.");
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
 
   const handleLogin = async ({ email, password }) => {
     const response = await apiRequest("/auth/login", {
@@ -52,6 +65,28 @@ function App() {
     setToken(token);
     setCurrentUser(user);
     setAccessError("");
+
+    setCoursesLoading(true);
+    setCoursesError("");
+
+    try {
+      const path = user.role === "admin" ? "/courses/catalog" : "/courses";
+      const coursesResponse = await apiRequest(path, {
+        token: user.role === "admin" ? token : undefined,
+      });
+      setCourses(
+        coursesResponse.data.map((course) => ({
+          ...course,
+          id: course.id || course._id,
+        }))
+      );
+    } catch (coursesError) {
+      setCoursesError(
+        coursesError.message || "Unable to load courses."
+      );
+    } finally {
+      setCoursesLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -147,6 +182,9 @@ function App() {
     return (
       <Courses
         courses={courses}
+        loading={coursesLoading}
+        error={coursesError}
+        onRefreshCourses={() => handleLoadCourses(token)}
         onCreateCourse={() => console.log("Create course")}
         onSelectCourse={(course) =>
           console.log("Selected course:", course)
@@ -175,6 +213,8 @@ function App() {
           <LearnerHome
             user={{ name: currentUser.name }}
             courses={courses}
+            loading={coursesLoading}
+            error={coursesError}
             onSelectCourse={(course) => {
               console.log("Selected course:", course);
             }}
@@ -200,7 +240,10 @@ function App() {
           <nav className="page-navigation">
             <button
               type="button"
-              onClick={() => setCurrentPage("courses")}
+              onClick={() => {
+                setCurrentPage("courses");
+                handleLoadCourses(token);
+              }}
             >
               Courses
             </button>
