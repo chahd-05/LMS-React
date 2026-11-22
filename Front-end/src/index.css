@@ -158,6 +158,31 @@ button:focus-visible {
   margin-bottom: 20px;
 }
 
+.courses-toolbar {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.course-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.course-filter select {
+  min-width: 160px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
 .user-filter {
   display: flex;
   flex-direction: column;
