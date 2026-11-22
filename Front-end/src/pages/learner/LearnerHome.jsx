@@ -8,7 +8,7 @@ function LearnerHome({
   courses = [],
   loading = false,
   error = "",
-  onSelectCourse,
+  onRefreshCourses,
 }) {
   if (loading) {
     return <Loading message="Loading your courses..." />;
@@ -20,7 +20,15 @@ function LearnerHome({
         <div>
           <h1>Welcome, {user?.name || "Learner"}!</h1>
           <p>Continue learning and explore your courses.</p>
+          {user?.email && (
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+          )}
         </div>
+        <Button onClick={onRefreshCourses} disabled={loading}>
+          {loading ? "Loading..." : "Refresh My Courses"}
+        </Button>
       </header>
 
       <ErrorMessage message={error} />
@@ -43,13 +51,8 @@ function LearnerHome({
                   Category: {course.category} | Level: {course.level}
                 </p>
                 <span>{course.status}</span>
-
-                <Button
-                  variant="secondary"
-                  onClick={() => onSelectCourse?.(course)}
-                >
-                  View Course
-                </Button>
+                <p>Enrollment: {course.enrollmentStatus || "active"}</p>
+                <p>Progress: {course.progress || 0}%</p>
               </article>
             ))}
           </div>
