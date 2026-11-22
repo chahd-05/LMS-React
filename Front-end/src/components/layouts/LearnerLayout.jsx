@@ -1,10 +1,13 @@
-function LearnerLayout({ children, onLogout }) {
+function LearnerLayout({ children, onLogout, user }) {
   return (
     <div className="app-layout">
       <header className="app-header">
-        <h1>EduLearn — Espace apprenant</h1>
+        <div className="learner-layout-title">
+          <h1>EduLearn — Espace apprenant</h1>
+          {user?.name && <p>{user.name}</p>}
+        </div>
 
-        <button type="button" onClick={onLogout}>
+        <button type="button" onClick={onLogout} aria-label="Se déconnecter">
           Déconnexion
         </button>
       </header>
