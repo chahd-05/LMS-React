@@ -1,7 +1,16 @@
 const express = require("express");
-const { getUsers } = require("../controllers/userController");
+const {
+  getUsers,
+  updateUser,
+  updateUserStatus,
+} = require("../controllers/userController");
 const authenticate = require("../middlewares/authenticate");
 const { authorize } = require("../middlewares/authorize");
+const validate = require("../middlewares/validate");
+const {
+  updateUserSchema,
+  updateUserStatusSchema,
+} = require("../validators/userValidator");
 const { roles } = require("../consts/roles");
 
 const router = express.Router();
@@ -83,5 +92,81 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.get("/", authenticate, authorize(roles.ADMIN), getUsers);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Update a user (admin only)
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, role]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               role:
+ *                 type: string
+ *                 enum: [learner, trainer, admin]
+ */
+router.put(
+  "/:id",
+  authenticate,
+  authorize(roles.ADMIN),
+  validate(updateUserSchema),
+  updateUser
+);
+
+/**
+ * @swagger
+ * /api/users/{id}/status:
+ *   patch:
+ *     summary: Activate or suspend a user (admin only)
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [active, suspended]
+ */
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorize(roles.ADMIN),
+  validate(updateUserStatusSchema),
+  updateUserStatus
+);
 
 module.exports = router;
