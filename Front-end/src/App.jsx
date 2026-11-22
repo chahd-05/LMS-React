@@ -27,6 +27,11 @@ function App() {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [coursesError, setCoursesError] = useState("");
 
+  const [learnerEnrollments, setLearnerEnrollments] = useState([]);
+  const [learnerLoading, setLearnerLoading] = useState(false);
+  const [learnerError, setLearnerError] = useState("");
+  const [learnerProfile, setLearnerProfile] = useState(null);
+
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
@@ -75,6 +80,35 @@ function App() {
     }
   };
 
+  const handleLoadLearnerEnrollments = async (authToken = token) => {
+    setLearnerLoading(true);
+    setLearnerError("");
+
+    try {
+      const enrollments = await apiRequest("/enrollments/me", {
+        token: authToken,
+      });
+
+      const enrolledCourses = enrollments
+        .filter((enrollment) => enrollment.course)
+        .map((enrollment) => ({
+          ...enrollment.course,
+          id: enrollment.course.id || enrollment.course._id,
+          enrollmentStatus: enrollment.status,
+          progress: enrollment.progress || 0,
+        }));
+
+      setLearnerEnrollments(enrolledCourses);
+    } catch (error) {
+      handleApiError(error);
+      setLearnerError(
+        error.message || "Unable to load your enrolled courses."
+      );
+    } finally {
+      setLearnerLoading(false);
+    }
+  };
+
   const handleLogin = async ({ email, password }) => {
     const response = await apiRequest("/auth/login", {
       method: "POST",
@@ -84,8 +118,40 @@ function App() {
     const { token, user } = response.data;
 
     setToken(token);
-    setCurrentUser(user);
     setAccessError("");
+    setLearnerLoading(true);
+    setLearnerError("");
+    setCurrentUser(user);
+
+    if (user.role === "learner") {
+      setLearnerProfile(user);
+      try {
+        const profileResponse = await apiRequest("/auth/me", { token });
+        setLearnerProfile(profileResponse.data);
+        setCurrentUser(profileResponse.data);
+
+        const enrollments = await apiRequest("/enrollments/me", { token });
+        const enrolledCourses = enrollments
+          .filter((enrollment) => enrollment.course)
+          .map((enrollment) => ({
+            ...enrollment.course,
+            id: enrollment.course.id || enrollment.course._id,
+            enrollmentStatus: enrollment.status,
+            progress: enrollment.progress || 0,
+          }));
+        setLearnerEnrollments(enrolledCourses);
+      } catch (learnerError) {
+        handleApiError(learnerError);
+        setLearnerError(
+          learnerError.message || "Unable to load your learner space."
+        );
+      } finally {
+        setLearnerLoading(false);
+      }
+      return;
+    } else {
+      setCurrentUser(user);
+    }
 
     setCoursesLoading(true);
     setCoursesError("");
@@ -251,7 +317,7 @@ function App() {
         session={currentUser}
         allowedRoles={["learner"]}
       >
-        <LearnerLayout onLogout={handleLogout}>
+        <LearnerLayout onLogout={handleLogout} user={currentUser}>
           {accessError && (
             <p className="error-message" role="alert">
               {accessError}
@@ -259,10 +325,13 @@ function App() {
           )}
 
           <LearnerHome
-            user={{ name: currentUser.name }}
-            courses={courses}
-            loading={coursesLoading}
-            error={coursesError}
+            user={learnerProfile || currentUser}
+            courses={learnerEnrollments}
+            loading={learnerLoading}
+            error={learnerError}
+            onRefreshCourses={() =>
+              handleLoadLearnerEnrollments(token)
+            }
             onSelectCourse={(course) => {
               console.log("Selected course:", course);
             }}
