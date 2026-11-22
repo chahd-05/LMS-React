@@ -5,6 +5,7 @@ import "./App.css";
 
 import AdminLayout from "./components/layouts/AdminLayout";
 import LearnerLayout from "./components/layouts/LearnerLayout";
+import TrainerLayout from "./components/layouts/TrainerLayout";
 
 import Courses from "./pages/Admin/Courses";
 import Users from "./pages/Admin/Users";
@@ -30,19 +31,39 @@ function App() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
 
+  const normalizeCourseStatus = (course) => {
+    const rawStatus =
+      course.status || course.publicationStatus || "draft";
+    const status = String(rawStatus).trim().toLowerCase();
+
+    if (["draft", "published", "archived"].includes(status)) {
+      return status;
+    }
+
+    return "draft";
+  };
+
   const handleLoadCourses = async (authToken = token) => {
     setCoursesLoading(true);
     setCoursesError("");
 
     try {
-      const path =
-        currentUser?.role === "admin" ? "/courses/catalog" : "/courses";
+      let path = "/courses";
+      if (currentUser?.role === "admin") {
+        path = "/courses/catalog";
+      } else if (currentUser?.role === "trainer") {
+        path = "/trainer/courses";
+      }
       const response = await apiRequest(path, {
-        token: currentUser?.role === "admin" ? authToken : undefined,
+        token:
+          currentUser?.role === "admin" || currentUser?.role === "trainer"
+            ? authToken
+            : undefined,
       });
       const coursesWithIds = response.data.map((course) => ({
         ...course,
         id: course.id || course._id,
+        status: normalizeCourseStatus(course),
       }));
 
       setCourses(coursesWithIds);
@@ -70,14 +91,21 @@ function App() {
     setCoursesError("");
 
     try {
-      const path = user.role === "admin" ? "/courses/catalog" : "/courses";
+      let path = "/courses";
+      if (user.role === "admin") {
+        path = "/courses/catalog";
+      } else if (user.role === "trainer") {
+        path = "/trainer/courses";
+      }
       const coursesResponse = await apiRequest(path, {
-        token: user.role === "admin" ? token : undefined,
+        token:
+          user.role === "admin" || user.role === "trainer" ? token : undefined,
       });
       setCourses(
         coursesResponse.data.map((course) => ({
           ...course,
           id: course.id || course._id,
+          status: normalizeCourseStatus(course),
         }))
       );
     } catch (coursesError) {
@@ -164,6 +192,26 @@ function App() {
     });
   };
 
+  const handleCreateCourse = async (courseData) => {
+    return await authenticatedRequest("/courses", {
+      method: "POST",
+      body: courseData,
+    });
+  };
+
+  const handleUpdateCourse = async (courseId, courseData) => {
+    return await authenticatedRequest(`/courses/${courseId}`, {
+      method: "PUT",
+      body: courseData,
+    });
+  };
+
+  const handleUpdateCourseStatus = async (courseId, status) => {
+    return await authenticatedRequest(`/courses/${courseId}/${status}`, {
+      method: "PATCH",
+    });
+  };
+
   const renderAdminPage = () => {
     if (currentPage === "users") {
       return (
@@ -185,10 +233,10 @@ function App() {
         loading={coursesLoading}
         error={coursesError}
         onRefreshCourses={() => handleLoadCourses(token)}
-        onCreateCourse={() => console.log("Create course")}
-        onSelectCourse={(course) =>
-          console.log("Selected course:", course)
-        }
+        canManageCourses={currentUser?.role === "trainer"}
+        onCreateCourse={handleCreateCourse}
+        onUpdateCourse={handleUpdateCourse}
+        onUpdateCourseStatus={handleUpdateCourseStatus}
       />
     );
   };
@@ -220,6 +268,25 @@ function App() {
             }}
           />
         </LearnerLayout>
+      </ProtectedView>
+    );
+  }
+
+  if (currentUser.role === "trainer") {
+    return (
+      <ProtectedView
+        session={currentUser}
+        allowedRoles={["trainer"]}
+      >
+        <TrainerLayout onLogout={handleLogout}>
+          {accessError && (
+            <p className="error-message" role="alert">
+              {accessError}
+            </p>
+          )}
+
+          {renderAdminPage()}
+        </TrainerLayout>
       </ProtectedView>
     );
   }
