@@ -111,9 +111,6 @@ function App() {
           loading={usersLoading}
           error={usersError}
           onRefreshUsers={handleLoadUsers}
-          onSelectUser={(user) =>
-            console.log("Selected user:", user)
-          }
         />
       );
     }
