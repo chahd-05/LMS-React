@@ -39,6 +39,10 @@ function LearnerHome({
               <article className="course-card" key={course.id}>
                 <h3>{course.title}</h3>
                 <p>{course.description}</p>
+                <p>
+                  Category: {course.category} | Level: {course.level}
+                </p>
+                <span>{course.status}</span>
 
                 <Button
                   variant="secondary"
