@@ -150,6 +150,69 @@ button:focus-visible {
   gap: 20px;
 }
 
+.users-toolbar {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.user-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.user-filter select {
+  min-width: 160px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.users-content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.user-details-panel {
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.user-details-panel h2 {
+  margin-top: 0;
+}
+
+.user-details-panel dl,
+.user-details-panel dl div {
+  margin: 0;
+}
+
+.user-details-panel dl div + div {
+  margin-top: 14px;
+}
+
+.user-details-panel dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.user-details-panel dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .course-card,
 .user-card,
 .empty-state {
@@ -223,6 +286,10 @@ button:focus-visible {
 
   .courses-list,
   .users-list {
+    grid-template-columns: 1fr;
+  }
+
+  .users-content {
     grid-template-columns: 1fr;
   }
 }
