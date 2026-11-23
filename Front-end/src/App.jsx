@@ -7,14 +7,14 @@ import AdminLayout from "./components/layouts/AdminLayout";
 import LearnerLayout from "./components/layouts/LearnerLayout";
 import TrainerLayout from "./components/layouts/TrainerLayout";
 
-import Courses from "./pages/Admin/Courses";
-import Users from "./pages/Admin/Users";
-import LearnerHome from "./pages/Learner/LearnerHome";
+import Courses from "./pages/admin/Courses";
+import Users from "./pages/admin/Users";
+import LearnerHome from "./pages/learner/LearnerHome";
 import Login from "./pages/Login";
 
 import { apiRequest } from "./services/api";
 
-import ProtectedView from "./components/common/protectedView";
+import ProtectedView from "./components/common/ProtectedView";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -59,12 +59,14 @@ function App() {
       } else if (currentUser?.role === "trainer") {
         path = "/trainer/courses";
       }
+
       const response = await apiRequest(path, {
         token:
           currentUser?.role === "admin" || currentUser?.role === "trainer"
             ? authToken
             : undefined,
       });
+
       const coursesWithIds = response.data.map((course) => ({
         ...course,
         id: course.id || course._id,
@@ -125,12 +127,14 @@ function App() {
 
     if (user.role === "learner") {
       setLearnerProfile(user);
+
       try {
         const profileResponse = await apiRequest("/auth/me", { token });
         setLearnerProfile(profileResponse.data);
         setCurrentUser(profileResponse.data);
 
         const enrollments = await apiRequest("/enrollments/me", { token });
+
         const enrolledCourses = enrollments
           .filter((enrollment) => enrollment.course)
           .map((enrollment) => ({
@@ -139,6 +143,7 @@ function App() {
             enrollmentStatus: enrollment.status,
             progress: enrollment.progress || 0,
           }));
+
         setLearnerEnrollments(enrolledCourses);
       } catch (learnerError) {
         handleApiError(learnerError);
@@ -148,6 +153,7 @@ function App() {
       } finally {
         setLearnerLoading(false);
       }
+
       return;
     } else {
       setCurrentUser(user);
@@ -158,15 +164,20 @@ function App() {
 
     try {
       let path = "/courses";
+
       if (user.role === "admin") {
         path = "/courses/catalog";
       } else if (user.role === "trainer") {
         path = "/trainer/courses";
       }
+
       const coursesResponse = await apiRequest(path, {
         token:
-          user.role === "admin" || user.role === "trainer" ? token : undefined,
+          user.role === "admin" || user.role === "trainer"
+            ? token
+            : undefined,
       });
+
       setCourses(
         coursesResponse.data.map((course) => ({
           ...course,
@@ -219,6 +230,7 @@ function App() {
 
     try {
       const response = await authenticatedRequest("/users");
+
       const usersWithIds = response.data.map((user) => ({
         ...user,
         id: user.id || user._id,
