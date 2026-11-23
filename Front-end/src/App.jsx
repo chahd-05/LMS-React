@@ -16,7 +16,7 @@ import { apiRequest } from "./services/api";
 
 import ProtectedView from "./components/common/ProtectedView";
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Link } from "react-router-dom";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -322,8 +322,19 @@ function App() {
   };
 
   if (!currentUser) {
-    return <Login onLogin={handleLogin} />;
-  }
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={<Login onLogin={handleLogin} />}
+      />
+      <Route
+        path="*"
+        element={<Navigate to="/login" replace />}
+      />
+    </Routes>
+  );
+}
 
   if (currentUser.role === "learner") {
     return (
