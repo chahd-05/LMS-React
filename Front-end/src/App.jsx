@@ -16,6 +16,8 @@ import { apiRequest } from "./services/api";
 
 import ProtectedView from "./components/common/ProtectedView";
 
+import { Routes, Route, Navigate } from "react-router-dom";
+
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
