@@ -13,6 +13,7 @@ import LearnerHome from "./pages/learner/LearnerHome";
 import Login from "./pages/Login";
 import Forbidden from "./pages/Forbidden";
 import NotFound from "./pages/NotFound";
+import CourseDetails from "./pages/CourseDetails";
 
 import { apiRequest } from "./services/api";
 
@@ -513,6 +514,21 @@ function App() {
       <Route
         path="/"
         element={<Navigate to={homePath} replace />}
+      />
+
+      <Route 
+        path="/courses/:courseId"
+        element={
+          <ProtectedView
+            session={currentUser}
+            allowedRoles={["admin", "trainer", "learner"]}
+          >
+            <CourseDetails
+              courses={courses}
+              backPath={homePath}
+            />
+          </ProtectedView>
+        }
       />
 
       <Route
