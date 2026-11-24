@@ -1,6 +1,7 @@
+
 import { useParams, Link } from "react-router-dom";
 
-function CourseDetails({ courses = [] }) {
+function CourseDetails({ courses = [], backPath = "/" }) {
   const { courseId } = useParams();
 
   const course = courses.find(
@@ -9,9 +10,9 @@ function CourseDetails({ courses = [] }) {
 
   if (!course) {
     return (
-      <main>
+      <main className="page">
         <h1>Course Not Found</h1>
-        <Link to="/admin/courses">Back to Courses</Link>
+        <Link to={backPath}>Back to Courses</Link>
       </main>
     );
   }
@@ -19,23 +20,24 @@ function CourseDetails({ courses = [] }) {
   return (
     <main className="page">
       <h1>{course.title}</h1>
-
       <p>{course.description}</p>
 
       <h2>Objectives</h2>
-      <ul>
-        {course.objectives?.map((objective, index) => (
-          <li key={index}>{objective}</li>
-        ))}
-      </ul>
+      {course.objectives?.length > 0 ? (
+        <ul>
+          {course.objectives.map((objective, index) => (
+            <li key={index}>{objective}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No objectives provided.</p>
+      )}
 
       <p>Category: {course.category}</p>
       <p>Level: {course.level}</p>
-      <p>
-        Duration: {course.estimatedDuration} minutes
-      </p>
+      <p>Duration: {course.estimatedDuration ?? "Not provided"} minutes</p>
 
-      <Link to="/admin/courses">Back to Courses</Link>
+      <Link to={backPath}>Back to Courses</Link>
     </main>
   );
 }
