@@ -16,9 +16,10 @@ import { apiRequest } from "./services/api";
 
 import ProtectedView from "./components/common/ProtectedView";
 
-import { Routes, Route, Navigate, Link } from "react-router-dom";
+import { Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 
 function App() {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [accessError, setAccessError] = useState("");
@@ -156,9 +157,14 @@ function App() {
         setLearnerLoading(false);
       }
 
+      navigate("/learner");
       return;
     } else {
       setCurrentUser(user);
+
+      navigate(
+        user.role === "admin" ? "/admin/courses" : "/trainer/courses"
+      );
     }
 
     setCoursesLoading(true);
