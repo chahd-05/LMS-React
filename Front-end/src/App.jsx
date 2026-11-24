@@ -365,185 +365,168 @@ function App() {
       />
 
       <Route
-        path="/learner"
-        element={
-          currentUser.role === "learner" ? (
-            <ProtectedView
-              session={currentUser}
-              allowedRoles={["learner"]}
-            >
-              <LearnerLayout
-                onLogout={handleLogout}
-                user={currentUser}
-              >
-                {accessError && (
-                  <p className="error-message" role="alert">
-                    {accessError}
-                  </p>
-                )}
+  path="/learner"
+  element={
+    <ProtectedView
+      session={currentUser}
+      allowedRoles={["learner"]}
+    >
+      <LearnerLayout
+        onLogout={handleLogout}
+        user={currentUser}
+      >
+        {accessError && (
+          <p className="error-message" role="alert">
+            {accessError}
+          </p>
+        )}
 
-                <LearnerHome
-                  user={learnerProfile || currentUser}
-                  courses={learnerEnrollments}
-                  loading={learnerLoading}
-                  error={learnerError}
-                  onRefreshCourses={() =>
-                    handleLoadLearnerEnrollments(token)
-                  }
-                  onSelectCourse={(course) => {
-                    console.log("Selected course:", course);
-                  }}
-                />
-              </LearnerLayout>
-            </ProtectedView>
-          ) : (
-            <Navigate to={homePath} replace />
-          )
-        }
-      />
+        <LearnerHome
+          user={learnerProfile || currentUser}
+          courses={learnerEnrollments}
+          loading={learnerLoading}
+          error={learnerError}
+          onRefreshCourses={() =>
+            handleLoadLearnerEnrollments(token)
+          }
+          onSelectCourse={(course) => {
+            console.log("Selected course:", course);
+          }}
+        />
+      </LearnerLayout>
+    </ProtectedView>
+  }
+/>
 
       <Route
-        path="/trainer/courses"
-        element={
-          currentUser.role === "trainer" ? (
-            <ProtectedView
-              session={currentUser}
-              allowedRoles={["trainer"]}
-            >
-              <TrainerLayout onLogout={handleLogout}>
-                {accessError && (
-                  <p className="error-message" role="alert">
-                    {accessError}
-                  </p>
-                )}
+  path="/trainer/courses"
+  element={
+    <ProtectedView
+      session={currentUser}
+      allowedRoles={["trainer"]}
+    >
+      <TrainerLayout onLogout={handleLogout}>
+        {accessError && (
+          <p className="error-message" role="alert">
+            {accessError}
+          </p>
+        )}
 
-                {renderAdminPage()}
-              </TrainerLayout>
-            </ProtectedView>
-          ) : (
-            <Navigate to={homePath} replace />
-          )
-        }
-      />
+        {renderAdminPage()}
+      </TrainerLayout>
+    </ProtectedView>
+  }
+/>
 
       <Route
-        path="/admin/courses"
-        element={
-          currentUser.role === "admin" ? (
-            <ProtectedView
-              session={currentUser}
-              allowedRoles={["admin"]}
-            >
-              <AdminLayout onLogout={handleLogout}>
-                {accessError && (
-                  <p className="error-message" role="alert">
-                    {accessError}
-                  </p>
-                )}
+  path="/admin/courses"
+  element={
+    <ProtectedView
+      session={currentUser}
+      allowedRoles={["admin"]}
+    >
+      <AdminLayout onLogout={handleLogout}>
+        {accessError && (
+          <p className="error-message" role="alert">
+            {accessError}
+          </p>
+        )}
 
-                <nav className="page-navigation">
-                  <Link to="/admin/courses">Courses</Link>
-                  <Link
-                    to="/admin/users"
-                    onClick={handleLoadUsers}
-                  >
-                    Users
-                  </Link>
-                </nav>
+        <nav className="page-navigation">
+          <Link to="/admin/courses">Courses</Link>
+          <Link
+            to="/admin/users"
+            onClick={handleLoadUsers}
+          >
+            Users
+          </Link>
+        </nav>
 
-                <Courses
-                  courses={courses}
-                  loading={coursesLoading}
-                  error={coursesError}
-                  onRefreshCourses={() => handleLoadCourses(token)}
-                  canManageCourses={true}
-                  onCreateCourse={handleCreateCourse}
-                  onUpdateCourse={handleUpdateCourse}
-                  onUpdateCourseStatus={handleUpdateCourseStatus}
-                />
-              </AdminLayout>
-            </ProtectedView>
-          ) : (
-            <Navigate to={homePath} replace />
-          )
-        }
-      />
+        <Courses
+          courses={courses}
+          loading={coursesLoading}
+          error={coursesError}
+          onRefreshCourses={() => handleLoadCourses(token)}
+          canManageCourses={true}
+          onCreateCourse={handleCreateCourse}
+          onUpdateCourse={handleUpdateCourse}
+          onUpdateCourseStatus={handleUpdateCourseStatus}
+        />
+      </AdminLayout>
+    </ProtectedView>
+  }
+/>
 
       <Route
-        path="/admin/users"
-        element={
-          currentUser.role === "admin" ? (
-            <ProtectedView
-              session={currentUser}
-              allowedRoles={["admin"]}
-            >
-              <AdminLayout onLogout={handleLogout}>
-                {accessError && (
-                  <p className="error-message" role="alert">
-                    {accessError}
-                  </p>
-                )}
+  path="/admin/users"
+  element={
+    <ProtectedView
+      session={currentUser}
+      allowedRoles={["admin"]}
+    >
+      <AdminLayout onLogout={handleLogout}>
+        {accessError && (
+          <p className="error-message" role="alert">
+            {accessError}
+          </p>
+        )}
 
-                <nav className="page-navigation">
-                  <Link
-                    to="/admin/courses"
-                    onClick={() => handleLoadCourses(token)}
-                  >
-                    Courses
-                  </Link>
-                  <Link to="/admin/users">Users</Link>
-                </nav>
+        <nav className="page-navigation">
+          <Link
+            to="/admin/courses"
+            onClick={() => handleLoadCourses(token)}
+          >
+            Courses
+          </Link>
+          <Link to="/admin/users">Users</Link>
+        </nav>
 
-                <Users
-                  users={users}
-                  loading={usersLoading}
-                  error={usersError}
-                  onRefreshUsers={handleLoadUsers}
-                  onCreateUser={handleCreateUser}
-                  onUpdateUser={handleUpdateUser}
-                  onUpdateUserStatus={handleUpdateUserStatus}
-                />
-              </AdminLayout>
-            </ProtectedView>
-          ) : (
-            <Navigate to={homePath} replace />
-          )
-        }
-      />
+        <Users
+          users={users}
+          loading={usersLoading}
+          error={usersError}
+          onRefreshUsers={handleLoadUsers}
+          onCreateUser={handleCreateUser}
+          onUpdateUser={handleUpdateUser}
+          onUpdateUserStatus={handleUpdateUserStatus}
+        />
+      </AdminLayout>
+    </ProtectedView>
+  }
+/>
 
       <Route
         path="/"
         element={<Navigate to={homePath} replace />}
       />
 
-      <Route 
-        path="/courses/:courseId"
-        element={
-          <ProtectedView
-            session={currentUser}
-            allowedRoles={["admin", "trainer", "learner"]}
-          >
-            <CourseDetails
-              courses={courses}
-              backPath={homePath}
-            />
-          </ProtectedView>
+      <Route
+  path="/courses/:courseId"
+  element={
+    <ProtectedView
+      session={currentUser}
+      allowedRoles={["admin", "trainer", "learner"]}
+    >
+      <CourseDetails
+        courses={
+          currentUser.role === "learner"
+            ? learnerEnrollments
+            : courses
         }
+        backPath={homePath}
+      />
+    </ProtectedView>
+  }
+/>
+
+      <Route
+        path="/403"
+        element={<Forbidden />}
       />
 
       <Route
         path="*"
-        element={<Navigate to={homePath} replace />}
-      />
-
-      <Route
-      path="/403"
-      element={<Forbidden />}
-      />
-
-      <Route
-      path="*"
-      element={<NotFound />}
+        element={<NotFound />}
       />
     </Routes>
   );
