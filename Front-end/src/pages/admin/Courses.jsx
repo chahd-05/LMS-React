@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Button from "../../components/common/Button";
 import Loading from "../../components/common/Loading";
@@ -15,6 +15,7 @@ function Courses({
   onUpdateCourseStatus,
   canManageCourses = false,
 }) {
+  const navigate = useNavigate();
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -30,7 +31,7 @@ function Courses({
   const [courseLoading, setCourseLoading] = useState(false);
   const [courseSuccess, setCourseSuccess] = useState("");
   const [courseError, setCourseError] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState(null);
+ 
 
   const getCourseStatus = (course) => {
     const rawStatus =
@@ -68,17 +69,6 @@ function Courses({
     setStatusFilter("all");
   };
 
-  const selectedCourse = courses.find(
-    (course) => String(course.id) === selectedCourseId
-  );
-
-  const openCourseDetails = (course) => {
-    setSelectedCourseId(String(course.id));
-  };
-
-  const closeCourseDetails = () => {
-    setSelectedCourseId(null);
-  };
 
   const clearForm = () => {
     setTitle("");
@@ -472,7 +462,7 @@ function Courses({
 
                     <Button
                       variant="secondary"
-                      onClick={() => openCourseDetails(course)}
+                      onClick={() => navigate(`/courses/${course.id}`)}
                     >
                       View Details
                     </Button>
@@ -509,59 +499,6 @@ function Courses({
                 ))}
               </div>
 
-              {selectedCourse && (
-                <aside className="course-details-panel" aria-live="polite">
-                  <div className="course-details-header">
-                    <h2>Course Details</h2>
-                    <Button
-                      variant="secondary"
-                      onClick={closeCourseDetails}
-                    >
-                      Close
-                    </Button>
-                  </div>
-
-                  <dl>
-                    <div>
-                      <dt>Title</dt>
-                      <dd>{selectedCourse.title}</dd>
-                    </div>
-                    <div>
-                      <dt>Description</dt>
-                      <dd>{selectedCourse.description}</dd>
-                    </div>
-                    <div>
-                      <dt>Objectives</dt>
-                      <dd>
-                        {Array.isArray(selectedCourse.objectives) &&
-                        selectedCourse.objectives.length > 0
-                          ? selectedCourse.objectives.join(", ")
-                          : "No objectives provided"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Category</dt>
-                      <dd>{selectedCourse.category}</dd>
-                    </div>
-                    <div>
-                      <dt>Level</dt>
-                      <dd>{selectedCourse.level}</dd>
-                    </div>
-                    <div>
-                      <dt>Duration</dt>
-                      <dd>
-                        {selectedCourse.estimatedDuration
-                          ? `${selectedCourse.estimatedDuration} minutes`
-                          : "Not provided"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Status</dt>
-                      <dd>{getCourseStatus(selectedCourse)}</dd>
-                    </div>
-                  </dl>
-                </aside>
-              )}
             </div>
           )}
         </>
