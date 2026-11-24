@@ -327,112 +327,196 @@ function App() {
     );
   };
 
+  
+  const homePath =
+    currentUser?.role === "learner"
+      ? "/learner"
+      : currentUser?.role === "trainer"
+        ? "/trainer/courses"
+        : currentUser?.role === "admin"
+          ? "/admin/courses"
+          : "/login";
+
   if (!currentUser) {
+    return (
+      <Routes>
+        <Route
+          path="/login"
+          element={<Login onLogin={handleLogin} />}
+        />
+        <Route
+          path="*"
+          element={<Navigate to="/login" replace />}
+        />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route
         path="/login"
-        element={<Login onLogin={handleLogin} />}
+        element={<Navigate to={homePath} replace />}
       />
+
+      <Route
+        path="/learner"
+        element={
+          currentUser.role === "learner" ? (
+            <ProtectedView
+              session={currentUser}
+              allowedRoles={["learner"]}
+            >
+              <LearnerLayout
+                onLogout={handleLogout}
+                user={currentUser}
+              >
+                {accessError && (
+                  <p className="error-message" role="alert">
+                    {accessError}
+                  </p>
+                )}
+
+                <LearnerHome
+                  user={learnerProfile || currentUser}
+                  courses={learnerEnrollments}
+                  loading={learnerLoading}
+                  error={learnerError}
+                  onRefreshCourses={() =>
+                    handleLoadLearnerEnrollments(token)
+                  }
+                  onSelectCourse={(course) => {
+                    console.log("Selected course:", course);
+                  }}
+                />
+              </LearnerLayout>
+            </ProtectedView>
+          ) : (
+            <Navigate to={homePath} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/trainer/courses"
+        element={
+          currentUser.role === "trainer" ? (
+            <ProtectedView
+              session={currentUser}
+              allowedRoles={["trainer"]}
+            >
+              <TrainerLayout onLogout={handleLogout}>
+                {accessError && (
+                  <p className="error-message" role="alert">
+                    {accessError}
+                  </p>
+                )}
+
+                {renderAdminPage()}
+              </TrainerLayout>
+            </ProtectedView>
+          ) : (
+            <Navigate to={homePath} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/courses"
+        element={
+          currentUser.role === "admin" ? (
+            <ProtectedView
+              session={currentUser}
+              allowedRoles={["admin"]}
+            >
+              <AdminLayout onLogout={handleLogout}>
+                {accessError && (
+                  <p className="error-message" role="alert">
+                    {accessError}
+                  </p>
+                )}
+
+                <nav className="page-navigation">
+                  <Link to="/admin/courses">Courses</Link>
+                  <Link
+                    to="/admin/users"
+                    onClick={handleLoadUsers}
+                  >
+                    Users
+                  </Link>
+                </nav>
+
+                <Courses
+                  courses={courses}
+                  loading={coursesLoading}
+                  error={coursesError}
+                  onRefreshCourses={() => handleLoadCourses(token)}
+                  canManageCourses={true}
+                  onCreateCourse={handleCreateCourse}
+                  onUpdateCourse={handleUpdateCourse}
+                  onUpdateCourseStatus={handleUpdateCourseStatus}
+                />
+              </AdminLayout>
+            </ProtectedView>
+          ) : (
+            <Navigate to={homePath} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          currentUser.role === "admin" ? (
+            <ProtectedView
+              session={currentUser}
+              allowedRoles={["admin"]}
+            >
+              <AdminLayout onLogout={handleLogout}>
+                {accessError && (
+                  <p className="error-message" role="alert">
+                    {accessError}
+                  </p>
+                )}
+
+                <nav className="page-navigation">
+                  <Link
+                    to="/admin/courses"
+                    onClick={() => handleLoadCourses(token)}
+                  >
+                    Courses
+                  </Link>
+                  <Link to="/admin/users">Users</Link>
+                </nav>
+
+                <Users
+                  users={users}
+                  loading={usersLoading}
+                  error={usersError}
+                  onRefreshUsers={handleLoadUsers}
+                  onCreateUser={handleCreateUser}
+                  onUpdateUser={handleUpdateUser}
+                  onUpdateUserStatus={handleUpdateUserStatus}
+                />
+              </AdminLayout>
+            </ProtectedView>
+          ) : (
+            <Navigate to={homePath} replace />
+          )
+        }
+      />
+
+      <Route
+        path="/"
+        element={<Navigate to={homePath} replace />}
+      />
+
       <Route
         path="*"
-        element={<Navigate to="/login" replace />}
+        element={<Navigate to={homePath} replace />}
       />
     </Routes>
   );
-}
-
-  if (currentUser.role === "learner") {
-    return (
-      <ProtectedView
-        session={currentUser}
-        allowedRoles={["learner"]}
-      >
-        <LearnerLayout onLogout={handleLogout} user={currentUser}>
-          {accessError && (
-            <p className="error-message" role="alert">
-              {accessError}
-            </p>
-          )}
-
-          <LearnerHome
-            user={learnerProfile || currentUser}
-            courses={learnerEnrollments}
-            loading={learnerLoading}
-            error={learnerError}
-            onRefreshCourses={() =>
-              handleLoadLearnerEnrollments(token)
-            }
-            onSelectCourse={(course) => {
-              console.log("Selected course:", course);
-            }}
-          />
-        </LearnerLayout>
-      </ProtectedView>
-    );
-  }
-
-  if (currentUser.role === "trainer") {
-    return (
-      <ProtectedView
-        session={currentUser}
-        allowedRoles={["trainer"]}
-      >
-        <TrainerLayout onLogout={handleLogout}>
-          {accessError && (
-            <p className="error-message" role="alert">
-              {accessError}
-            </p>
-          )}
-
-          {renderAdminPage()}
-        </TrainerLayout>
-      </ProtectedView>
-    );
-  }
-
-  if (currentUser.role === "admin") {
-    return (
-      <ProtectedView
-        session={currentUser}
-        allowedRoles={["admin"]}
-      >
-        <AdminLayout onLogout={handleLogout}>
-          {accessError && (
-            <p className="error-message" role="alert">
-              {accessError}
-            </p>
-          )}
-
-          <nav className="page-navigation">
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentPage("courses");
-                handleLoadCourses(token);
-              }}
-            >
-              Courses
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentPage("users");
-                handleLoadUsers();
-              }}
-            >
-              Users
-            </button>
-          </nav>
-
-          {renderAdminPage()}
-        </AdminLayout>
-      </ProtectedView>
-    );
-  }
-
-  return <p role="alert">Rôle non pris en charge.</p>;
 }
 
 export default App;
