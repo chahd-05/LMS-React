@@ -210,6 +210,7 @@ function App() {
     setCurrentUser(null);
     setCurrentPage("courses");
     setAccessError("");
+    navigate("/login", { replace: true});
   };
 
   const handleApiError = (error) => {
