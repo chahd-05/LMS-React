@@ -11,10 +11,13 @@ import Courses from "./pages/admin/Courses";
 import Users from "./pages/admin/Users";
 import LearnerHome from "./pages/learner/LearnerHome";
 import Login from "./pages/Login";
+import Forbidden from "./pages/Forbidden";
+import NotFound from "./pages/NotFound";
 
 import { apiRequest } from "./services/api";
 
 import ProtectedView from "./components/common/ProtectedView";
+
 
 import { Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 
@@ -514,6 +517,16 @@ function App() {
       <Route
         path="*"
         element={<Navigate to={homePath} replace />}
+      />
+
+      <Route
+      path="/403"
+      element={<Forbidden />}
+      />
+
+      <Route
+      path="*"
+      element={<NotFound />}
       />
     </Routes>
   );
