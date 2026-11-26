@@ -1,4 +1,7 @@
-function TrainerLayout({ children, onLogout }) {
+import { Outlet } from "react-router";
+
+
+function TrainerLayout({onLogout }) {
   return (
     <div className="app-layout">
       <header className="app-header">
@@ -9,7 +12,9 @@ function TrainerLayout({ children, onLogout }) {
         </button>
       </header>
 
-      <main className="app-main">{children}</main>
+      <main className="app-main">
+        <Outlet />
+      </main>
     </div>
   );
 }

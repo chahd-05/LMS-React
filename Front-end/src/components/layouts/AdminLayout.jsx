@@ -1,4 +1,6 @@
-function AdminLayout({ children, onLogout }) {
+import { Outlet } from "react-router";
+
+function AdminLayout({onLogout }) {
   return (
     <div className="app-layout">
       <header className="app-header">
@@ -10,7 +12,7 @@ function AdminLayout({ children, onLogout }) {
       </header>
 
       <main className="app-main">
-        {children}
+       <Outlet />
       </main>
     </div>
   );

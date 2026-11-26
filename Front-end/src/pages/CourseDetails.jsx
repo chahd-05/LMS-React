@@ -1,5 +1,4 @@
-
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router";
 
 function CourseDetails({ courses = [], backPath = "/" }) {
   const { courseId } = useParams();

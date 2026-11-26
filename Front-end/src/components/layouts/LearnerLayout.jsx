@@ -1,4 +1,6 @@
-function LearnerLayout({ children, onLogout, user }) {
+import { Outlet } from "react-router";
+
+function LearnerLayout({ onLogout, user }) {
   return (
     <div className="app-layout">
       <header className="app-header">
@@ -13,7 +15,7 @@ function LearnerLayout({ children, onLogout, user }) {
       </header>
 
       <main className="app-main">
-        {children}
+        <Outlet />
       </main>
     </div>
   );
